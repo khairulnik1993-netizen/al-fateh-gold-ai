@@ -1,0 +1,59 @@
+
+name: Build AL FATEH GOLD AI APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "AL_FATEH_GOLD_AI_PRO_V8_Android_Source_v1.1.zip"
+      - ".github/workflows/build-apk.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Extract source ZIP
+        run: |
+          mkdir -p restored
+          unzip -o AL_FATEH_GOLD_AI_PRO_V8_Android_Source_v1.1.zip -d restored
+
+      - name: Find Flutter source
+        run: |
+          PUBSPEC=$(find restored -name pubspec.yaml -print -quit)
+          if [ -z "$PUBSPEC" ]; then
+            echo "ERROR: pubspec.yaml tidak dijumpai dalam ZIP"
+            exit 1
+          fi
+          SRC_DIR=$(dirname "$PUBSPEC")
+          echo "Source found: $SRC_DIR"
+          cp -a "$SRC_DIR/lib" .
+          cp "$SRC_DIR/pubspec.yaml" .
+          if [ -d "$SRC_DIR/assets" ]; then
+            cp -a "$SRC_DIR/assets" .
+          fi
+
+      - name: Build APK
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AL-FATEH-GOLD-AI-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
