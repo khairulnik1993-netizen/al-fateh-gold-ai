@@ -47,13 +47,20 @@ jobs:
         run: |
           flutter create --platforms=android --org com.alfateh.gold work
 
-      - name: Copy app source
+      - name: Copy app source and Android permissions
         run: |
           cp -a "$SRC_DIR/lib" work/
           cp "$SRC_DIR/pubspec.yaml" work/
+          cp "$SRC_DIR/android/app/src/main/AndroidManifest.xml" work/android/app/src/main/AndroidManifest.xml
+
           if [ -d "$SRC_DIR/assets" ]; then
             cp -a "$SRC_DIR/assets" work/
           fi
+
+          sed -i '/android.permission.INTERNET/a\    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' work/android/app/src/main/AndroidManifest.xml
+
+          echo "Checking Android permissions:"
+          grep "uses-permission" work/android/app/src/main/AndroidManifest.xml
 
       - name: Build APK
         run: |
@@ -66,4 +73,3 @@ jobs:
         with:
           name: AL-FATEH-GOLD-AI-APK
           path: work/build/app/outputs/flutter-apk/app-release.apk
-
