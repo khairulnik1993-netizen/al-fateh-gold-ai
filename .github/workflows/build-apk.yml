@@ -1,69 +1,46 @@
 
-name: Build AL FATEH GOLD AI PRO V10 CHART TEST
+name: Build AL FATEH GOLD AI PRO V10 APK
 
 on:
   workflow_dispatch:
   push:
-    paths:
-      - "AL_FATEH_GOLD_AI_PRO_V10_CHART_ONLY_NO_SERVICE_TEST_Source.zip"
-      - ".github/workflows/build-apk.yml"
+    branches: [ main, master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.5"
+          flutter-version: '3.24.5'
 
-      - name: Extract V10 Chart Test Source
+      - name: Create Android wrapper
+        run: flutter create --platforms=android --org com.alfateh.gold work
+
+      - name: Copy app source
         run: |
-          mkdir -p restored
-          unzip -o AL_FATEH_GOLD_AI_PRO_V10_CHART_ONLY_NO_SERVICE_TEST_Source.zip -d restored
+          cp -a lib work/
+          cp pubspec.yaml work/
+          cp android/app/src/main/AndroidManifest.xml work/android/app/src/main/AndroidManifest.xml
 
-      - name: Find Flutter source
-        run: |
-          PUBSPEC=$(find restored -name pubspec.yaml -print -quit)
-          if [ -z "$PUBSPEC" ]; then
-            echo "ERROR: pubspec.yaml not found"
-            exit 1
-          fi
-          SRC_DIR=$(dirname "$PUBSPEC")
-          echo "SRC_DIR=$SRC_DIR" >> $GITHUB_ENV
-
-      - name: Create Android project
-        run: |
-          flutter create --platforms=android --org com.alfateh.gold work
-
-      - name: Copy V10 source
-        run: |
-          cp -a "$SRC_DIR/lib" work/
-          cp "$SRC_DIR/pubspec.yaml" work/
-          cp "$SRC_DIR/android/app/src/main/AndroidManifest.xml" work/android/app/src/main/AndroidManifest.xml
-
-          if [ -d "$SRC_DIR/assets" ]; then
-            cp -a "$SRC_DIR/assets" work/
-          fi
-
-      - name: Build APK
+      - name: Build release APK
         run: |
           cd work
           flutter pub get
           flutter build apk --release
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AL-FATEH-GOLD-AI-PRO-V10-CHART-TEST
+          name: AL-FATEH-GOLD-AI-PRO-V10-APK
           path: work/build/app/outputs/flutter-apk/app-release.apk
