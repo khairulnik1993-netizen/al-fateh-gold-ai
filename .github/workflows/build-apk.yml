@@ -66,3 +66,4 @@ jobs:
         with:
           name: AL-FATEH-GOLD-AI-APK
           path: work/build/app/outputs/flutter-apk/app-release.apk
+
