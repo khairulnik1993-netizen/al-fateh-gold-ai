@@ -1,11 +1,11 @@
 
-name: Build AL FATEH GOLD AI PRO V10 TEST
+name: Build AL FATEH GOLD AI PRO V10 CHART BACKGROUND FIX
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - "AL_FATEH_GOLD_AI_PRO_V10_TEST_NO_BACKGROUND_Source.zip"
+      - "AL_FATEH_GOLD_AI_PRO_V10_CHART_BACKGROUND_FIX_Source.zip"
       - ".github/workflows/build-apk.yml"
 
 jobs:
@@ -27,10 +27,10 @@ jobs:
         with:
           flutter-version: "3.24.5"
 
-      - name: Extract V10 Test Source
+      - name: Extract V10 source
         run: |
           mkdir -p restored
-          unzip -o AL_FATEH_GOLD_AI_PRO_V10_TEST_NO_BACKGROUND_Source.zip -d restored
+          unzip -o AL_FATEH_GOLD_AI_PRO_V10_CHART_BACKGROUND_FIX_Source.zip -d restored
 
       - name: Find Flutter source
         run: |
@@ -65,5 +65,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AL-FATEH-GOLD-AI-PRO-V10-TEST
+          name: AL-FATEH-GOLD-AI-PRO-V10-CHART-BACKGROUND-FIX
           path: work/build/app/outputs/flutter-apk/app-release.apk
