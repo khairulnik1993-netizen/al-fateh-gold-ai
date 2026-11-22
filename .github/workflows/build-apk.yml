@@ -36,19 +36,28 @@ jobs:
         run: |
           PUBSPEC=$(find restored -name pubspec.yaml -print -quit)
           if [ -z "$PUBSPEC" ]; then
-            echo "ERROR: pubspec.yaml tidak dijumpai dalam ZIP"
+            echo "ERROR: pubspec.yaml tidak dijumpai"
             exit 1
           fi
           SRC_DIR=$(dirname "$PUBSPEC")
           echo "Source found: $SRC_DIR"
-          cp -a "$SRC_DIR/lib" .
-          cp "$SRC_DIR/pubspec.yaml" .
+          echo "SRC_DIR=$SRC_DIR" >> $GITHUB_ENV
+
+      - name: Create Android project
+        run: |
+          flutter create --platforms=android --org com.alfateh.gold work
+
+      - name: Copy app source
+        run: |
+          cp -a "$SRC_DIR/lib" work/
+          cp "$SRC_DIR/pubspec.yaml" work/
           if [ -d "$SRC_DIR/assets" ]; then
-            cp -a "$SRC_DIR/assets" .
+            cp -a "$SRC_DIR/assets" work/
           fi
 
       - name: Build APK
         run: |
+          cd work
           flutter pub get
           flutter build apk --release
 
@@ -56,4 +65,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: AL-FATEH-GOLD-AI-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: work/build/app/outputs/flutter-apk/app-release.apk
