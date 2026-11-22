@@ -1,11 +1,11 @@
 
-name: Build AL FATEH GOLD AI PRO V9 APK
+name: Build AL FATEH GOLD AI PRO V10 APK
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - "AL_FATEH_GOLD_AI_PRO_V9_Android_Source.zip"
+      - "AL_FATEH_GOLD_AI_PRO_V10_COMPLETE_Background_Alerts.zip"
       - ".github/workflows/build-apk.yml"
 
 jobs:
@@ -27,10 +27,10 @@ jobs:
         with:
           flutter-version: "3.24.5"
 
-      - name: Extract V9 source
+      - name: Extract V10 source
         run: |
           mkdir -p restored
-          unzip -o AL_FATEH_GOLD_AI_PRO_V9_Android_Source.zip -d restored
+          unzip -o AL_FATEH_GOLD_AI_PRO_V10_COMPLETE_Background_Alerts.zip -d restored
 
       - name: Find Flutter source
         run: |
@@ -46,7 +46,7 @@ jobs:
         run: |
           flutter create --platforms=android --org com.alfateh.gold work
 
-      - name: Copy V9 source
+      - name: Copy V10 source
         run: |
           cp -a "$SRC_DIR/lib" work/
           cp "$SRC_DIR/pubspec.yaml" work/
@@ -55,8 +55,6 @@ jobs:
           if [ -d "$SRC_DIR/assets" ]; then
             cp -a "$SRC_DIR/assets" work/
           fi
-
-          echo "V9 source copied successfully"
 
       - name: Build APK
         run: |
@@ -67,5 +65,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AL-FATEH-GOLD-AI-PRO-V9-APK
+          name: AL-FATEH-GOLD-AI-PRO-V10-APK
           path: work/build/app/outputs/flutter-apk/app-release.apk
