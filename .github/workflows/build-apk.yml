@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "AL_FATEH_GOLD_AI_PRO_V10_COMPLETE_Background_Alerts.zip"
+      - "AL_FATEH_GOLD_AI_PRO_V10_FIXED_Source.zip"
       - ".github/workflows/build-apk.yml"
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
       - name: Extract V10 source
         run: |
           mkdir -p restored
-          unzip -o AL_FATEH_GOLD_AI_PRO_V10_COMPLETE_Background_Alerts.zip -d restored
+          unzip -o AL_FATEH_GOLD_AI_PRO_V10_FIXED_Source.zip -d restored
 
       - name: Find Flutter source
         run: |
