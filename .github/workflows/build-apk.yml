@@ -1,11 +1,11 @@
 
-name: Build AL FATEH GOLD AI APK
+name: Build AL FATEH GOLD AI PRO V9 APK
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - "AL_FATEH_GOLD_AI_PRO_V8_Android_Source_v1.1.zip"
+      - "AL_FATEH_GOLD_AI_PRO_V9_Android_Source.zip"
       - ".github/workflows/build-apk.yml"
 
 jobs:
@@ -27,27 +27,26 @@ jobs:
         with:
           flutter-version: "3.24.5"
 
-      - name: Extract source ZIP
+      - name: Extract V9 source
         run: |
           mkdir -p restored
-          unzip -o AL_FATEH_GOLD_AI_PRO_V8_Android_Source_v1.1.zip -d restored
+          unzip -o AL_FATEH_GOLD_AI_PRO_V9_Android_Source.zip -d restored
 
       - name: Find Flutter source
         run: |
           PUBSPEC=$(find restored -name pubspec.yaml -print -quit)
           if [ -z "$PUBSPEC" ]; then
-            echo "ERROR: pubspec.yaml tidak dijumpai"
+            echo "ERROR: pubspec.yaml not found"
             exit 1
           fi
           SRC_DIR=$(dirname "$PUBSPEC")
-          echo "Source found: $SRC_DIR"
           echo "SRC_DIR=$SRC_DIR" >> $GITHUB_ENV
 
       - name: Create Android project
         run: |
           flutter create --platforms=android --org com.alfateh.gold work
 
-      - name: Copy app source and Android permissions
+      - name: Copy V9 source
         run: |
           cp -a "$SRC_DIR/lib" work/
           cp "$SRC_DIR/pubspec.yaml" work/
@@ -57,10 +56,7 @@ jobs:
             cp -a "$SRC_DIR/assets" work/
           fi
 
-          sed -i '/android.permission.INTERNET/a\    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' work/android/app/src/main/AndroidManifest.xml
-
-          echo "Checking Android permissions:"
-          grep "uses-permission" work/android/app/src/main/AndroidManifest.xml
+          echo "V9 source copied successfully"
 
       - name: Build APK
         run: |
@@ -71,5 +67,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AL-FATEH-GOLD-AI-APK
+          name: AL-FATEH-GOLD-AI-PRO-V9-APK
           path: work/build/app/outputs/flutter-apk/app-release.apk
