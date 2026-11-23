@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -24,18 +24,27 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Build Debug APK
+      - name: Extract Android project
         run: |
-          if [ ! -f ./gradlew ]; then
-            echo "ERROR: Gradle wrapper gradlew not found"
+          unzip -q AL_FATEH_GOLD_AI_PRO_MarketAPI_Alerts_Source.zip -d extracted
+          WRAPPER=$(find extracted -type f -name gradlew -print -quit)
+          if [ -z "$WRAPPER" ]; then
+            echo "ERROR: ZIP does not contain gradlew."
+            echo "The Android project or Gradle wrapper is incomplete."
             exit 1
           fi
-          chmod +x ./gradlew
+          PROJECT_DIR=$(dirname "$WRAPPER")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+          chmod +x "$WRAPPER"
+
+      - name: Build debug APK
+        run: |
+          cd "$PROJECT_DIR"
           ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AL-FATEH-GOLD-AI-PRO-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: extracted/**/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
