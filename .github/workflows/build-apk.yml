@@ -26,25 +26,41 @@ jobs:
 
       - name: Extract Android project
         run: |
-          unzip -q AL_FATEH_GOLD_AI_PRO_MarketAPI_Alerts_Source.zip -d extracted
-          WRAPPER=$(find extracted -type f -name gradlew -print -quit)
-          if [ -z "$WRAPPER" ]; then
-            echo "ERROR: ZIP does not contain gradlew."
-            echo "The Android project or Gradle wrapper is incomplete."
+          set -e
+          ZIP="AL_FATEH_GOLD_AI_PRO_MarketAPI_Alerts_Source_FIXED.zip"
+
+          if [ ! -f "$ZIP" ]; then
+            echo "ERROR: ZIP baharu tidak dijumpai."
+            echo "Upload ZIP FIXED ke root repository dahulu."
             exit 1
           fi
-          PROJECT_DIR=$(dirname "$WRAPPER")
+
+          mkdir -p restored
+          unzip -q "$ZIP" -d restored
+
+          if [ ! -f restored/settings.gradle ] && \
+             [ ! -f restored/settings.gradle.kts ]; then
+            echo "ERROR: settings.gradle tidak dijumpai."
+            find restored -maxdepth 3 -type f
+            exit 1
+          fi
+
+          PROJECT_DIR=$(dirname "$(find restored -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-          chmod +x "$WRAPPER"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
 
       - name: Build debug APK
         run: |
           cd "$PROJECT_DIR"
-          ./gradlew assembleDebug
+          gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AL-FATEH-GOLD-AI-PRO-APK
-          path: extracted/**/app/build/outputs/apk/debug/*.apk
+          path: restored/**/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
