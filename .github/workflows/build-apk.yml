@@ -4,7 +4,9 @@ name: Build AL FATEH GOLD AI PRO V11 APK
 on:
   workflow_dispatch:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
 
 jobs:
   build:
@@ -24,15 +26,33 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.5'
+          channel: stable
 
       - name: Create Android wrapper
         run: flutter create --platforms=android --org com.alfateh.gold work
 
       - name: Copy app source
         run: |
-          cp -a lib work/
-          cp pubspec.yaml work/
-          cp android/app/src/main/AndroidManifest.xml work/android/app/src/main/AndroidManifest.xml
+          echo "Checking repository files..."
+          ls -la
+
+          if [ -d "lib" ] && [ -f "pubspec.yaml" ]; then
+            cp -a lib work/
+            cp pubspec.yaml work/
+          elif [ -d "al_fateh_android/lib" ] && [ -f "al_fateh_android/pubspec.yaml" ]; then
+            cp -a al_fateh_android/lib work/
+            cp al_fateh_android/pubspec.yaml work/
+          else
+            echo "ERROR: Flutter lib or pubspec.yaml not found."
+            find . -maxdepth 5 -type f | head -200
+            exit 1
+          fi
+
+          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
+            cp android/app/src/main/AndroidManifest.xml work/android/app/src/main/AndroidManifest.xml
+          elif [ -f "al_fateh_android/android/app/src/main/AndroidManifest.xml" ]; then
+            cp al_fateh_android/android/app/src/main/AndroidManifest.xml work/android/app/src/main/AndroidManifest.xml
+          fi
 
       - name: Build release APK
         run: |
@@ -45,3 +65,4 @@ jobs:
         with:
           name: AL-FATEH-GOLD-AI-PRO-V11-APK
           path: work/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
