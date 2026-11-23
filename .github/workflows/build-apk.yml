@@ -1,101 +1,47 @@
 
-name: Build AL FATEH GOLD AI PRO V10 APK
+name: Build AL FATEH GOLD AI PRO V11 APK
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - master
-
-permissions:
-  contents: read
+    branches: [ main, master ]
 
 jobs:
   build:
-    name: Build Android Release APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Source
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.5'
-          channel: stable
-          cache: true
 
-      - name: Locate Flutter Project
-        shell: bash
+      - name: Create Android wrapper
+        run: flutter create --platforms=android --org com.alfateh.gold work
+
+      - name: Copy app source
         run: |
-          if [ -f pubspec.yaml ]; then
-            echo "SOURCE_DIR=." >> "$GITHUB_ENV"
-          elif [ -f al_fateh_android/pubspec.yaml ]; then
-            echo "SOURCE_DIR=al_fateh_android" >> "$GITHUB_ENV"
-          else
-            echo "ERROR: pubspec.yaml not found"
-            exit 1
-          fi
+          cp -a lib work/
+          cp pubspec.yaml work/
+          cp android/app/src/main/AndroidManifest.xml work/android/app/src/main/AndroidManifest.xml
 
-      - name: Create Android Wrapper
+      - name: Build release APK
         run: |
-          flutter create \
-            --platforms=android \
-            --org com.alfateh.gold \
-            --project-name al_fateh_gold \
-            work
+          cd work
+          flutter pub get
+          flutter build apk --release
 
-      - name: Copy V10 Source
-        shell: bash
-        run: |
-          mkdir -p work/lib
-          cp -a "$SOURCE_DIR"/lib/. work/lib/
-          cp "$SOURCE_DIR/pubspec.yaml" work/pubspec.yaml
-
-          if [ -f "$SOURCE_DIR/android/app/src/main/AndroidManifest.xml" ]; then
-            cp "$SOURCE_DIR/android/app/src/main/AndroidManifest.xml" \
-              work/android/app/src/main/AndroidManifest.xml
-          fi
-
-      - name: Install Dependencies
-        working-directory: work
-        run: flutter pub get
-
-      - name: Analyze Dart Source
-        working-directory: work
-        run: flutter analyze --no-pub
-
-      - name: Build Release APK
-        working-directory: work
-        run: |
-          flutter build apk \
-            --release \
-            --target-platform android-arm64
-
-      - name: Verify APK
-        run: |
-          APK="work/build/app/outputs/flutter-apk/app-release.apk"
-
-          if [ ! -s "$APK" ]; then
-            echo "APK build failed"
-            exit 1
-          fi
-
-          ls -lh "$APK"
-
-      - name: Upload APK Artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AL-FATEH-GOLD-AI-PRO-V10-APK
+          name: AL-FATEH-GOLD-AI-PRO-V11-APK
           path: work/build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
-          retention-days: 14
