@@ -28,27 +28,27 @@ jobs:
           flutter-version: '3.24.5'
           channel: stable
 
-      - name: Check V11 source
+      - name: Extract V11 source
         run: |
-          echo "Checking V11 files..."
-          ls -la
+          mkdir -p restored
+          unzip -o AL_FATEH_GOLD_AI_PRO_V11_COMPLETE_SOURCE.zip -d restored
 
-          if [ ! -d "lib" ] || [ ! -f "pubspec.yaml" ]; then
-            echo "ERROR: Folder lib atau pubspec.yaml tiada di root."
-            find . -maxdepth 4 -type f
-            exit 1
-          fi
+          echo "Checking extracted files..."
+          ls -la restored
+
+          test -d restored/lib
+          test -f restored/pubspec.yaml
 
       - name: Create Android wrapper
         run: flutter create --platforms=android --org com.alfateh.gold work
 
-      - name: Copy V11 source
+      - name: Copy V11 app source
         run: |
-          cp -a lib work/
-          cp pubspec.yaml work/
+          cp -a restored/lib work/
+          cp restored/pubspec.yaml work/
 
-          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
-            cp android/app/src/main/AndroidManifest.xml work/android/app/src/main/AndroidManifest.xml
+          if [ -f restored/android/app/src/main/AndroidManifest.xml ]; then
+            cp restored/android/app/src/main/AndroidManifest.xml work/android/app/src/main/AndroidManifest.xml
           fi
 
       - name: Build release APK
