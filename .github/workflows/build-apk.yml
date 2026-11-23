@@ -1,68 +1,16 @@
 
-name: Build AL FATEH GOLD AI PRO V11 APK
-
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - master
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.5'
-          channel: stable
-
-      - name: Create Android wrapper
-        run: flutter create --platforms=android --org com.alfateh.gold work
-
-      - name: Copy app source
+      - name: Restore V11 source
         run: |
-          ls -la
+          mkdir -p restored
 
           if [ -d "lib" ] && [ -f "pubspec.yaml" ]; then
-            cp -a lib work/
-            cp pubspec.yaml work/
+            cp -a lib pubspec.yaml restored/
           elif [ -d "al_fateh_android/lib" ] && [ -f "al_fateh_android/pubspec.yaml" ]; then
-            cp -a al_fateh_android/lib work/
-            cp al_fateh_android/pubspec.yaml work/
+            cp -a al_fateh_android/lib al_fateh_android/pubspec.yaml restored/
           else
-            echo "Flutter source not found!"
-            find . -maxdepth 5 -type f
+            echo "ERROR: V11 source not found!"
+            ls -la
             exit 1
           fi
 
-          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
-            cp android/app/src/main/AndroidManifest.xml work/android/app/src/main/AndroidManifest.xml
-          elif [ -f "al_fateh_android/android/app/src/main/AndroidManifest.xml" ]; then
-            cp al_fateh_android/android/app/src/main/AndroidManifest.xml work/android/app/src/main/AndroidManifest.xml
-          fi
-
-      - name: Build release APK
-        run: |
-          cd work
-          flutter pub get
-          flutter build apk --release
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: AL-FATEH-GOLD-AI-PRO-V11-APK
-          path: work/build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
-
+          ls -la restored
