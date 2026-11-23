@@ -33,7 +33,6 @@ jobs:
 
       - name: Copy app source
         run: |
-          echo "Checking repository files..."
           ls -la
 
           if [ -d "lib" ] && [ -f "pubspec.yaml" ]; then
@@ -43,8 +42,8 @@ jobs:
             cp -a al_fateh_android/lib work/
             cp al_fateh_android/pubspec.yaml work/
           else
-            echo "ERROR: Flutter lib or pubspec.yaml not found."
-            find . -maxdepth 5 -type f | head -200
+            echo "Flutter source not found!"
+            find . -maxdepth 5 -type f
             exit 1
           fi
 
@@ -66,3 +65,4 @@ jobs:
           name: AL-FATEH-GOLD-AI-PRO-V11-APK
           path: work/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
+
